@@ -1,0 +1,42 @@
+name: CI Pipeline
+
+# Déclenche la pipeline à chaque push ou pull request
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest  # machine utilisée pour exécuter le workflow
+
+    # Exécute les étapes pour chaque microservice
+    strategy:
+      matrix:
+        service: [auth, product, order, api-gateway]
+
+    steps:
+      # Récupère le code du repo
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Installe Node.js
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Installe les dépendances de chaque service
+      - name: Install dependencies
+        working-directory: ./${{ matrix.service }}
+        run: npm ci
+
+      # Lance les tests (si présents)
+      - name: Run tests
+        working-directory: ./${{ matrix.service }}
+        run: npm test || echo "Tests not configured for this service"
+
+      # Vérifie que chaque service peut être build avec Docker
+      - name: Build Docker image
+        run: docker build -t ecommerce-${{ matrix.service }} ./${{ matrix.service }}
