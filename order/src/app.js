@@ -3,10 +3,18 @@ const mongoose = require("mongoose");
 const Order = require("./models/order");
 const amqp = require("amqplib");
 const config = require("./config");
+const { register, metricsMiddleware } = require("../../utils/metrics");
 
 class App {
   constructor() {
     this.app = express();
+    this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: false }));
+    this.app.use(metricsMiddleware);
+    this.app.get("/metrics", async (req, res) => {
+      res.set("Content-Type", register.contentType);
+      res.end(await register.metrics());
+    });
     this.connectDB();
     this.setupOrderConsumer();
   }

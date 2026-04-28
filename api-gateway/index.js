@@ -1,8 +1,18 @@
 const express = require("express");
 const httpProxy = require("http-proxy");
+const { register, metricsMiddleware } = require("../utils/metrics");
 
 const proxy = httpProxy.createProxyServer();
 const app = express();
+
+// Collecte des métriques sur toutes les requêtes
+app.use(metricsMiddleware);
+
+// Endpoint Prometheus
+app.get("/metrics", async (req, res) => {
+  res.set("Content-Type", register.contentType);
+  res.end(await register.metrics());
+});
 
 // Route requests to the auth service
 app.use("/auth", (req, res) => {
