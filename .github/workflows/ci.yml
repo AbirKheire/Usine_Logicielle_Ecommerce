@@ -3,7 +3,7 @@ name: CI Pipeline
 # Déclenche la pipeline à chaque push ou pull request
 on:
   push:
-    branches: [*]
+    branches: ["*""]
   pull_request:
     branches: [main, develop]
 
