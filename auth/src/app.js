@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const config = require("./config");
 const authMiddleware = require("./middlewares/authMiddleware");
 const AuthController = require("./controllers/authController");
-const { register, metricsMiddleware } = require("../../utils/metrics");
+const { register, metricsMiddleware } = require("../utils/metrics");
 
 class App {
   constructor() {

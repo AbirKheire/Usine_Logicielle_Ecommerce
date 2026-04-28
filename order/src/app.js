@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const Order = require("./models/order");
 const amqp = require("amqplib");
 const config = require("./config");
-const { register, metricsMiddleware } = require("../../utils/metrics");
+const { register, metricsMiddleware } = require("../utils/metrics");
 
 class App {
   constructor() {

@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const config = require("./config");
 const MessageBroker = require("./utils/messageBroker");
 const productsRouter = require("./routes/productRoutes");
-const { register, metricsMiddleware } = require("../../utils/metrics");
+const { register, metricsMiddleware } = require("../utils/metrics");
 require("dotenv").config();
 
 class App {

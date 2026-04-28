@@ -1,6 +1,6 @@
 const express = require("express");
 const httpProxy = require("http-proxy");
-const { register, metricsMiddleware } = require("../utils/metrics");
+const { register, metricsMiddleware } = require("./utils/metrics");
 
 const proxy = httpProxy.createProxyServer();
 const app = express();
