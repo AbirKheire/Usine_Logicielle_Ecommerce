@@ -11,7 +11,8 @@ jobs:
 ############################################
 ##### TEST
 ###########################################
-  # Teste chaque service en parallele avec MongoDB et RabbitMQ disponibles
+  # Teste chaque service en parallele avec RabbitMQ disponible
+  # MongoDB est mocke dans les tests (pas de vraie BDD)
   test:
     name: Tests - ${{ matrix.service }}
     runs-on: ubuntu-latest
@@ -21,10 +22,6 @@ jobs:
         service: [auth, product, order, api-gateway]
 
     services:
-      mongodb:
-        image: mongo:7
-        ports: ["27017:27017"]
-        options: --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })'" --health-interval 10s --health-timeout 5s --health-retries 5
       rabbitmq:
         image: rabbitmq:3.8-management-alpine
         ports: ["5672:5672"]
@@ -43,7 +40,6 @@ jobs:
         working-directory: ${{ matrix.service }}
         env:
           NODE_ENV: test
-          MONGODB_URI: mongodb://localhost:27017/test_${{ matrix.service }}
           RABBITMQ_URL: amqp://localhost:5672
           JWT_SECRET: ci-secret
       - uses: actions/upload-artifact@v4
@@ -76,7 +72,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
 #########################################################
-########## BUILD &  PUSH 
+########## BUILD & PUSH 
 #########################################################
   # Build et pousse les images Docker sur GHCR
   build-and-push:
@@ -135,4 +131,3 @@ jobs:
             docker compose pull &&
             docker compose up -d
           "
- 
