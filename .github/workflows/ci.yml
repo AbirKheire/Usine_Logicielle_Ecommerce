@@ -35,7 +35,7 @@ jobs:
       # Lance les tests (si présents)
       - name: Run tests
         working-directory: ./${{ matrix.service }}
-        run: npm test || echo "Tests not configured for this service"
+        run: npm test || true
 
       # Vérifie que chaque service peut être build avec Docker
       - name: Build Docker image
