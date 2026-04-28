@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const config = require("./config");
 const MessageBroker = require("./utils/messageBroker");
 const productsRouter = require("./routes/productRoutes");
+const { register, metricsMiddleware } = require("../utils/metrics");
 require("dotenv").config();
 
 class App {
@@ -30,10 +31,15 @@ class App {
   setMiddlewares() {
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: false }));
+    this.app.use(metricsMiddleware);
   }
 
   setRoutes() {
     this.app.use("/api/products", productsRouter);
+    this.app.get("/metrics", async (req, res) => {
+      res.set("Content-Type", register.contentType);
+      res.end(await register.metrics());
+    });
   }
 
   setupMessageBroker() {
