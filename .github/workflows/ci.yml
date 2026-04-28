@@ -10,9 +10,8 @@ jobs:
 
 ############################################
 ##### TEST
-###########################################
+############################################
   # Teste chaque service en parallele avec RabbitMQ disponible
-  # MongoDB est mocke dans les tests (pas de vraie BDD)
   test:
     name: Tests - ${{ matrix.service }}
     runs-on: ubuntu-latest
@@ -25,7 +24,11 @@ jobs:
       rabbitmq:
         image: rabbitmq:3.8-management-alpine
         ports: ["5672:5672"]
-        options: --health-cmd "rabbitmq-diagnostics -q ping" --health-interval 10s --health-timeout 5s --health-retries 5
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - uses: actions/checkout@v4
@@ -34,9 +37,12 @@ jobs:
           node-version: "20"
           cache: npm
           cache-dependency-path: ${{ matrix.service }}/package-lock.json
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
         working-directory: ${{ matrix.service }}
-      - run: npm test -- --coverage --coverageReporters=lcov --forceExit --detectOpenHandles
+      # npm test delegue a mocha via le package.json de chaque service
+      - name: Run tests
+        run: npm test
         working-directory: ${{ matrix.service }}
         env:
           NODE_ENV: test
@@ -48,10 +54,9 @@ jobs:
           name: coverage-${{ matrix.service }}
           path: ${{ matrix.service }}/coverage/lcov.info
 
-#####################################################
-############# SCAN SONARQUBE 
-#####################################################
-
+############################################
+##### SONARCLOUD
+############################################
   # Analyse la qualite du code sur SonarCloud
   sonarqube:
     name: SonarCloud
@@ -71,9 +76,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-#########################################################
-########## BUILD & PUSH 
-#########################################################
+############################################
+##### BUILD & PUSH
+############################################
   # Build et pousse les images Docker sur GHCR
   build-and-push:
     name: Docker - ${{ matrix.service }}
@@ -107,9 +112,9 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-##########################################################
-######### DEPLOY 
-##########################################################
+############################################
+##### DEPLOY
+############################################
   # Se connecte a l'instance EC2 AWS et relance la stack via docker compose
   deploy:
     name: Deploy to AWS EC2
